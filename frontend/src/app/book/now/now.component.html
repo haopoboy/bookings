@@ -10,6 +10,6 @@
         </div>
     </div>
 </ng-template>
-<mwl-calendar-week-view [viewDate]="viewDate" [dayStartHour]="option.dayStartHour"
-    [hourSegmentTemplate]="weekViewHourSegmentTemplate">
+<mwl-calendar-week-view [viewDate]="viewDate" [events]="events" [dayStartHour]="option.dayStartHour"
+    [hourSegmentTemplate]="weekViewHourSegmentTemplate" (eventTimesChanged)="eventTimesChanged($event)">
 </mwl-calendar-week-view>

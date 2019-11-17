@@ -3,13 +3,15 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  OnInit
+  OnInit,
+  ViewEncapsulation
 } from "@angular/core";
 import { CalendarEventTitleFormatter } from "angular-calendar";
 import { CalendarEvent, DayViewHourSegment } from "calendar-utils";
 import { fromEvent } from "rxjs";
 import { finalize, takeUntil } from "rxjs/operators";
 import { UtilService } from "src/app/service/util.service";
+import { BookingService } from "../booking.service";
 
 function floorToNearest(amount: number, precision: number) {
   return Math.floor(amount / precision) * precision;
@@ -43,7 +45,8 @@ export class CustomEventTitleFormatter extends CalendarEventTitleFormatter {
       provide: CalendarEventTitleFormatter,
       useClass: CustomEventTitleFormatter
     }
-  ]
+  ],
+  encapsulation: ViewEncapsulation.None
 })
 export class NowComponent implements OnInit {
   option = {
@@ -55,7 +58,8 @@ export class NowComponent implements OnInit {
   constructor(
     http: HttpClient,
     private cdr: ChangeDetectorRef,
-    public util: UtilService
+    public util: UtilService,
+    private booking: BookingService
   ) {
     http.get("/api/people").subscribe(page => {
       console.log(page);
@@ -69,14 +73,7 @@ export class NowComponent implements OnInit {
     mouseDownEvent: MouseEvent,
     segmentElement: HTMLElement
   ) {
-    const dragToSelectEvent: CalendarEvent = {
-      id: this.events.length,
-      title: "New event",
-      start: segment.date,
-      meta: {
-        tmpEvent: true
-      }
-    };
+    const dragToSelectEvent = this.createDefaultEvent(segment);
     this.events = [...this.events, dragToSelectEvent];
     const segmentPosition = segmentElement.getBoundingClientRect();
 
@@ -106,11 +103,34 @@ export class NowComponent implements OnInit {
           .add(daysDiff, "days")
           .toDate();
 
-        if (newEnd > segment.date) {
+        if (
+          newEnd > segment.date &&
+          !this.booking.conflicts(
+            this.events,
+            dragToSelectEvent,
+            dragToSelectEvent.start,
+            newEnd
+          )
+        ) {
           dragToSelectEvent.end = newEnd;
         }
         this.refresh();
       });
+  }
+
+  createDefaultEvent(segment: DayViewHourSegment): CalendarEvent {
+    const event = this.booking.createDefaultEvent(segment.date);
+    event.id = this.events.length;
+    return event;
+  }
+
+  eventTimesChanged({ event, newStart, newEnd }) {
+    if (this.booking.conflicts(this.events, event, newStart, newEnd)) {
+      return;
+    }
+    event.start = newStart;
+    event.end = newEnd;
+    this.refresh();
   }
 
   refresh() {
