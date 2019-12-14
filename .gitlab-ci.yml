@@ -1,0 +1,35 @@
+npm:
+  stage: build
+  image: node:10-alpine
+  before_script:
+    - cd frontend
+  script:
+    - npm install
+    - npm run build -- -c pages --base-href /docmd/
+  artifacts:
+    paths:
+      - frontend/dist
+    expire_in: 1 week
+
+gh-pages:
+  stage: deploy
+  dependencies:
+    - npm
+  variables:
+    GIT_STRATEGY: none
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$GIT_SSH_PRIVATE_KEY")
+    - mkdir ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+    - git config --global user.email "noreply@gitlab.ci"
+    - git config --global user.name "Gitlab CI"
+    - cd frontend/dist
+  script:
+    - git init
+    - git checkout --orphan gh-pages
+    - cp -a index.html 404.html
+    - git add -A
+    - git commit -m "Build from $CI_SERVER_NAME $CI_PIPELINE_ID" -q
+    - git remote add origin git@github.com:haopoboy/docmd.git
+    - git push origin gh-pages --force
