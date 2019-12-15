@@ -4,14 +4,19 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  ViewChild,
   ViewEncapsulation
 } from "@angular/core";
-import { CalendarEventTitleFormatter } from "angular-calendar";
+import {
+  CalendarEventTitleFormatter,
+  CalendarWeekViewComponent
+} from "angular-calendar";
 import { CalendarEvent, DayViewHourSegment } from "calendar-utils";
-import { fromEvent } from "rxjs";
+import { fromEvent, Subject } from "rxjs";
 import { finalize, takeUntil } from "rxjs/operators";
 import { UtilService } from "src/app/service/util.service";
 import { BookingService } from "../booking.service";
+import { EventTitleFormatter } from "../event-formatter.provider";
 
 function floorToNearest(amount: number, precision: number) {
   return Math.floor(amount / precision) * precision;
@@ -21,32 +26,18 @@ function ceilToNearest(amount: number, precision: number) {
   return Math.ceil(amount / precision) * precision;
 }
 
-export class CustomEventTitleFormatter extends CalendarEventTitleFormatter {
-  weekTooltip(event: CalendarEvent, title: string) {
-    if (!event.meta.tmpEvent) {
-      return super.weekTooltip(event, title);
-    }
-  }
-
-  dayTooltip(event: CalendarEvent, title: string) {
-    if (!event.meta.tmpEvent) {
-      return super.dayTooltip(event, title);
-    }
-  }
-}
-
 @Component({
   selector: "app-now",
   templateUrl: "./now.component.html",
   styleUrls: ["./now.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [
     {
       provide: CalendarEventTitleFormatter,
-      useClass: CustomEventTitleFormatter
+      useClass: EventTitleFormatter
     }
-  ],
-  encapsulation: ViewEncapsulation.None
+  ]
 })
 export class NowComponent implements OnInit {
   option = {
@@ -54,6 +45,10 @@ export class NowComponent implements OnInit {
   };
   viewDate = new Date();
   events: CalendarEvent[] = [];
+  refresh = new Subject();
+
+  @ViewChild("weekView", { static: false })
+  weekView: CalendarWeekViewComponent;
 
   constructor(
     http: HttpClient,
@@ -81,7 +76,7 @@ export class NowComponent implements OnInit {
       .pipe(
         finalize(() => {
           delete dragToSelectEvent.meta.tmpEvent;
-          this.refresh();
+          this.refreshEvents();
         }),
         takeUntil(fromEvent(document, "mouseup"))
       )
@@ -104,17 +99,20 @@ export class NowComponent implements OnInit {
           .toDate();
 
         if (
-          newEnd > segment.date &&
-          !this.booking.conflicts(
+          this.booking.conflicts(
             this.events,
             dragToSelectEvent,
             dragToSelectEvent.start,
             newEnd
           )
         ) {
+          return;
+        } else if (newEnd > segment.date) {
           dragToSelectEvent.end = newEnd;
+        } else if (newEnd <= segment.date) {
+          dragToSelectEvent.start = newEnd;
         }
-        this.refresh();
+        this.refreshEvents();
       });
   }
 
@@ -130,11 +128,15 @@ export class NowComponent implements OnInit {
     }
     event.start = newStart;
     event.end = newEnd;
-    this.refresh();
+    this.refreshEvents();
   }
 
-  refresh() {
-    this.events = [...this.events];
+  refreshEvents() {
+    // Force to emit rendering events
+    this.events = [...this.events].map(v => {
+      v.title = `${v.title} `;
+      return v;
+    });
     this.cdr.detectChanges();
   }
 }
