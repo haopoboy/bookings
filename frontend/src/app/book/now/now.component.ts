@@ -43,6 +43,7 @@ export class NowComponent implements OnInit {
   option = {
     dayStartHour: 8
   };
+  formData: any = {};
   viewDate = new Date();
   events: CalendarEvent[] = [];
   refresh = new Subject();
@@ -117,7 +118,7 @@ export class NowComponent implements OnInit {
   }
 
   createDefaultEvent(segment: DayViewHourSegment): CalendarEvent {
-    const event = this.booking.createDefaultEvent(segment.date);
+    const event = this.booking.createDefaultEvent(segment.date, this.formData);
     event.id = this.events.length;
     return event;
   }

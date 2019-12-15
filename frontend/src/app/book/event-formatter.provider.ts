@@ -1,10 +1,11 @@
 import { Injectable } from "@angular/core";
 import { CalendarEvent, CalendarEventTitleFormatter } from "angular-calendar";
 import { UtilService } from "../service/util.service";
+import { BookingService } from "./booking.service";
 
 @Injectable()
 export class EventTitleFormatter extends CalendarEventTitleFormatter {
-  constructor(private util: UtilService) {
+  constructor(private util: UtilService, private booking: BookingService) {
     super();
   }
 
@@ -21,9 +22,6 @@ export class EventTitleFormatter extends CalendarEventTitleFormatter {
   }
 
   week(event: CalendarEvent): string {
-    return `${event.title}<br/>
-    ${this.util.asMoment(event.start).format("h:mm")}
-    - ${this.util.asMoment(event.end).format("LT")}
-    `;
+    return this.booking.createTitle(event);
   }
 }

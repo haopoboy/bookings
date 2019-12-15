@@ -31,8 +31,8 @@ export class BookingService {
     );
   }
 
-  createDefaultEvent(start = new Date()): CalendarEvent {
-    return {
+  createDefaultEvent(start = new Date(), template: any = {}): CalendarEvent {
+    const event = {
       title: "New event",
       start,
       meta: {
@@ -44,5 +44,26 @@ export class BookingService {
       },
       draggable: true
     };
+    return Object.assign(event, template);
+  }
+
+  createTitle(event: CalendarEvent): string {
+    const startMoment = this.util.asMoment(event.start);
+    let start = null;
+    if (startMoment.minutes() === 0) {
+      start = startMoment.format("h");
+    } else {
+      start = startMoment.format("h:mm");
+    }
+
+    const endMoment = this.util.asMoment(event.end);
+    let end = null;
+    if (endMoment.minutes() === 0) {
+      end = endMoment.format("h A");
+    } else {
+      end = endMoment.format("LT");
+    }
+
+    return `${event.title}<br/>${start} - ${end}`;
   }
 }

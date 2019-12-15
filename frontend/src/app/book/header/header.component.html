@@ -1,0 +1,14 @@
+<div fxLayout="row" fxLayoutAlign="space-around center">
+    <div fxFlex="30">
+        <button mat-stroked-button mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
+            (viewDateChange)="viewDateChange.emit(viewDate)">Previous</button>
+        <button mat-stroked-button mwlCalendarToday [(viewDate)]="viewDate"
+            (viewDateChange)="viewDateChange.emit(viewDate)">Today</button>
+        <button mat-stroked-button mwlCalendarNextView [view]="view" [(viewDate)]="viewDate"
+            (viewDateChange)="viewDateChange.emit(viewDate)">Next</button>
+    </div>
+    <div>
+        <h1>{{viewDate | calendarDate:view + 'ViewTitle'}}</h1>
+    </div>
+    <div fxFlex="30"></div>
+</div>

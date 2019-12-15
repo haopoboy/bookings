@@ -1,5 +1,3 @@
-<app-iform></app-iform>
-
 <ng-template #weekViewHourSegmentTemplate let-segment="segment" let-locale="locale" let-segmentHeight="segmentHeight"
     let-isTimeLabel="isTimeLabel">
     <div #segmentElement class="cal-hour-segment" [style.height.px]="segmentHeight"
@@ -10,7 +8,15 @@
         </div>
     </div>
 </ng-template>
-<mwl-calendar-week-view #weekView [viewDate]="viewDate" [events]="events" [dayStartHour]="option.dayStartHour"
-    [hourSegmentTemplate]="weekViewHourSegmentTemplate" (eventTimesChanged)="eventTimesChanged($event)"
-    (refresh)="refresh">
-</mwl-calendar-week-view>
+<mat-card>
+    <mat-card-content>
+        <app-iform [data]="formData"></app-iform>
+    </mat-card-content>
+    <mat-card-content>
+        <app-header [(viewDate)]="viewDate"></app-header>
+        <mwl-calendar-week-view #weekView [viewDate]="viewDate" [events]="events" [dayStartHour]="option.dayStartHour"
+            [hourSegmentTemplate]="weekViewHourSegmentTemplate" (eventTimesChanged)="eventTimesChanged($event)"
+            (refresh)="refresh">
+        </mwl-calendar-week-view>
+    </mat-card-content>
+</mat-card>
