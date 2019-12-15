@@ -17,4 +17,13 @@ describe("BookingService", () => {
     const event2 = TestBed.get(BookingService).createDefaultEvent(start);
     expect(event2.start).toEqual(start);
   });
+
+  it("Create correct titles", () => {
+    const val = TestBed.get(BookingService).createTitle({
+      title: "Test",
+      start: new Date(),
+      end: new Date()
+    });
+    expect(val).toContain("Test");
+  });
 });

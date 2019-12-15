@@ -1,1 +1,13 @@
-<h2>Book now</h2>
+<form #myForm>
+    <div>
+        <mat-form-field>
+            <input matInput name="title" [(ngModel)]="data.title" placeholder="Title" />
+        </mat-form-field>
+        <mat-form-field>
+            <mat-select name="resource" [(ngModel)]="data.resource" placeholder="Resource">
+                <mat-option value="A1">A1</mat-option>
+                <mat-option value="B2">B2</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+</form>
