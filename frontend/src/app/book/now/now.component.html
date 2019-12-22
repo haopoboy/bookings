@@ -10,13 +10,18 @@
 </ng-template>
 <mat-card>
     <mat-card-content>
-        <app-iform [data]="formData"></app-iform>
-    </mat-card-content>
-    <mat-card-content>
         <app-header [(viewDate)]="viewDate"></app-header>
-        <mwl-calendar-week-view #weekView [viewDate]="viewDate" [events]="events" [dayStartHour]="option.dayStartHour"
-            [hourSegmentTemplate]="weekViewHourSegmentTemplate" (eventTimesChanged)="eventTimesChanged($event)"
-            (refresh)="refresh">
-        </mwl-calendar-week-view>
+    </mat-card-content>
+    <mat-divider></mat-divider>
+    <mat-card-content fxLayout="row" fxLayoutGap="15px">
+        <div>
+            <app-sidebar [(viewDate)]="viewDate"></app-sidebar>
+        </div>
+        <div fxFlex>
+            <mwl-calendar-week-view #weekView [viewDate]="viewDate" [events]="events"
+                [dayStartHour]="option.dayStartHour" [hourSegmentTemplate]="weekViewHourSegmentTemplate"
+                (eventTimesChanged)="eventTimesChanged($event)" (refresh)="refresh">
+            </mwl-calendar-week-view>
+        </div>
     </mat-card-content>
 </mat-card>
